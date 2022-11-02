@@ -18,7 +18,7 @@ const router = express.Router();
 /**
  * Get freets by author.
  *
- * @name GET /api/freets?author=username
+ * @name GET /api/freets?author=username&highlighted=highlighted
  *
  * @return {FreetResponse[]} - An array of freets created by user with username, author
  * @throws {400} - If author is not given
@@ -34,7 +34,7 @@ router.get(
       return;
     }
 
-    const allFreets = await FreetCollection.findAll();
+    const allFreets = await (req.query.highlighted ? FreetCollection.findAllHighlights() : FreetCollection.findAll());
     const response = allFreets.map(util.constructFreetResponse);
     res.status(200).json(response);
   },
@@ -42,7 +42,12 @@ router.get(
     userValidator.isAuthorExists
   ],
   async (req: Request, res: Response) => {
-    const authorFreets = await FreetCollection.findAllByUsername(req.query.author as string);
+    if (!req.query.highlighted) {
+      res.status(404).json({
+        error: 'Provided highlight status must be nonempty.'
+      })
+    }
+    const authorFreets = await FreetCollection.findAllByUsername(req.query.author as string, req.query.highlighted === 'true');
     const response = authorFreets.map(util.constructFreetResponse);
     res.status(200).json(response);
   }
@@ -67,11 +72,10 @@ router.post(
   ],
   async (req: Request, res: Response) => {
     const userId = (req.session.userId as string) ?? ''; // Will not be an empty string since its validated in isUserLoggedIn
-    const freet = await FreetCollection.addOne(userId, req.body.content);
-
+    const freet = await FreetCollection.addOne(userId, req.body.content, req.body.highlighted !== '');
     res.status(201).json({
       message: 'Your freet was created successfully.',
-      freet: util.constructFreetResponse(freet)
+      freet: util.constructFreetResponse(freet),
     });
   }
 );
@@ -123,7 +127,8 @@ router.patch(
     freetValidator.isValidFreetContent
   ],
   async (req: Request, res: Response) => {
-    const freet = await FreetCollection.updateOne(req.params.freetId, req.body.content);
+    const freet = await FreetCollection.updateOne(req.params.freetId, req.body.content, req.body.highlighted);
+    console.log(req.body);
     res.status(200).json({
       message: 'Your freet was updated successfully.',
       freet: util.constructFreetResponse(freet)

@@ -10,6 +10,7 @@ Vue.use(Vuex);
 const store = new Vuex.Store({
   state: {
     filter: null, // Username to filter shown freets by (null = show all)
+    highlightsOnly: false, // Filter shown freets by highlights
     freets: [], // All freets created in the app
     username: null, // Username of the logged in user
     alerts: {} // global success/error messages encountered during submissions to non-visible forms
@@ -38,6 +39,9 @@ const store = new Vuex.Store({
        */
       state.filter = filter;
     },
+    updateHighlightFilter(state, highlightsOnly) {
+      state.highlightsOnly = highlightsOnly;
+    },
     updateFreets(state, freets) {
       /**
        * Update the stored freets to the provided freets.
@@ -49,7 +53,7 @@ const store = new Vuex.Store({
       /**
        * Request the server for the currently available freets.
        */
-      const url = state.filter ? `/api/users/${state.filter}/freets` : '/api/freets';
+      const url = state.filter ? `/api/freets?author=${state.filter}&highlighted=${state.highlightsOnly}` : `/api/freets?highlighted=${state.highlightsOnly}`;
       const res = await fetch(url).then(async r => r.json());
       state.freets = res;
     }

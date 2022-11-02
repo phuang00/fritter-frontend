@@ -144,6 +144,52 @@ const isAuthorExists = async (req: Request, res: Response, next: NextFunction) =
   next();
 };
 
+/**
+ * Checks if a user with userId as user id in req.params exists
+ */
+const isUserExists = async (req: Request, res: Response, next: NextFunction) => {
+  const username = req.params.author ? req.params.author : req.params.user;
+  if (!username) {
+    res.status(400).json({
+      error: 'Provided user username must be nonempty.'
+    });
+    return;
+  }
+
+  const user = await UserCollection.findOneByUsername(username);
+  if (!user) {
+    res.status(404).json({
+      error: `A user with username ${username} does not exist.`
+    });
+    return;
+  }
+
+  next();
+};
+
+/**
+ * Checks if a user with owner as username in req.query/req.params exists
+ */
+ const isOwnerExists = async (req: Request, res: Response, next: NextFunction) => {
+  const username = (req.params.owner ? req.params.owner : req.query.owner) as string;
+  if (!username) {
+    res.status(400).json({
+      error: 'Provided user username must be nonempty.'
+    });
+    return;
+  }
+
+  const owner = await UserCollection.findOneByUsername(username);
+  if (!owner) {
+    res.status(404).json({
+      error: `A user with username ${username} does not exist.`
+    });
+    return;
+  }
+
+  next();
+};
+
 export {
   isCurrentSessionUserExists,
   isUserLoggedIn,
@@ -151,6 +197,8 @@ export {
   isUsernameNotAlreadyInUse,
   isAccountExists,
   isAuthorExists,
+  isUserExists,
+  isOwnerExists,
   isValidUsername,
-  isValidPassword
+  isValidPassword,
 };

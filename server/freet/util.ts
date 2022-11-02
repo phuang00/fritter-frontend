@@ -8,6 +8,7 @@ type FreetResponse = {
   author: string;
   dateCreated: string;
   content: string;
+  highlighted: boolean;
   dateModified: string;
 };
 

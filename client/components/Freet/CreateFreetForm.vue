@@ -12,7 +12,8 @@ export default {
       method: 'POST',
       hasBody: true,
       fields: [
-        {id: 'content', label: 'Content', value: ''}
+        {id: 'content', label: 'Content', value: ''},
+        {id: 'highlighted', label: 'Highlighted', value: false},
       ],
       title: 'Create a freet',
       refreshFreets: true,

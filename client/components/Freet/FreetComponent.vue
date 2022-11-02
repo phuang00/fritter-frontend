@@ -36,17 +36,28 @@
         </button>
       </div>
     </header>
-    <textarea
-      v-if="editing"
-      class="content"
-      :value="draft"
-      @input="draft = $event.target.value"
+    <div v-if="editing">
+      <textarea
+        class="content"
+        :value="draft"
+        @input="draft = $event.target.value"
     />
+    Highlighted: 
+    <input
+      type="checkbox"
+      :checked="highlighted"
+      @input="highlighted = $event.target.checked"
+     />
+    </div>
+    
     <p
       v-else
       class="content"
     >
       {{ freet.content }}
+    </p>
+    <p v-if="freet.highlighted">
+      Highlight ⭐️
     </p>
     <p class="info">
       Posted at {{ freet.dateModified }}
@@ -78,6 +89,7 @@ export default {
     return {
       editing: false, // Whether or not this freet is in edit mode
       draft: this.freet.content, // Potentially-new content for this freet
+      highlighted: this.freet.highlighted, // Potentially-new highlighted state for this freet
       alerts: {} // Displays success/error messages encountered during freet modification
     };
   },
@@ -88,6 +100,7 @@ export default {
        */
       this.editing = true; // Keeps track of if a freet is being edited
       this.draft = this.freet.content; // The content of our current "draft" while being edited
+      this.highlighted = this.freet.highlighted;
     },
     stopEditing() {
       /**
@@ -95,6 +108,7 @@ export default {
        */
       this.editing = false;
       this.draft = this.freet.content;
+      this.highlighted = this.freet.highlighted;
     },
     deleteFreet() {
       /**
@@ -114,7 +128,7 @@ export default {
       /**
        * Updates freet to have the submitted draft content.
        */
-      if (this.freet.content === this.draft) {
+      if (this.freet.content === this.draft && this.freet.highlighted === this.highlighted) {
         const error = 'Error: Edited freet content should be different than current freet content.';
         this.$set(this.alerts, error, 'error'); // Set an alert to be the error text, timeout of 3000 ms
         setTimeout(() => this.$delete(this.alerts, error), 3000);
@@ -124,7 +138,7 @@ export default {
       const params = {
         method: 'PATCH',
         message: 'Successfully edited freet!',
-        body: JSON.stringify({content: this.draft}),
+        body: JSON.stringify({content: this.draft, highlighted: this.highlighted}),
         callback: () => {
           this.$set(this.alerts, params.message, 'success');
           setTimeout(() => this.$delete(this.alerts, params.message), 3000);

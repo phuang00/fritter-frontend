@@ -25,7 +25,13 @@
       <header>
         <div class="left">
           <h2>
-            Viewing all freets
+            Viewing all 
+            <span v-if="$store.state.highlightsOnly">
+              highlights
+            </span>
+            <span v-else>
+              freets
+            </span>
             <span v-if="$store.state.filter">
               by @{{ $store.state.filter }}
             </span>

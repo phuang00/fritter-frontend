@@ -7,11 +7,14 @@ export default {
   name: 'GetFreetsForm',
   mixins: [InlineForm],
   data() {
-    return {value: this.$store.state.filter};
+    return {
+      value: this.$store.state.filter,
+      highlights: this.$store.state.highlightsOnly,
+    };
   },
   methods: {
     async submit() {
-      const url = this.value ? `/api/freets?author=${this.value}` : '/api/freets';
+      const url = this.value ? `/api/freets?author=${this.value}&highlighted=${this.highlights}` : `/api/freets?highlighted=${this.highlights}`;
       try {
         const r = await fetch(url);
         const res = await r.json();
@@ -27,6 +30,7 @@ export default {
           // change their username when you refresh
           this.$store.commit('updateFilter', null);
           this.value = ''; // Clear filter to show all users' freets
+          this.highlights = false;
           this.$store.commit('refreshFreets');
         } else {
           // Otherwise reset to previous fitler

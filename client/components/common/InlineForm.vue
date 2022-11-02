@@ -3,6 +3,12 @@
 
 <template>
   <form @submit.prevent="submit">
+    <label>Highlights Only:</label>
+    <input
+      v-model="highlights"
+      name="highlights"
+      type="checkbox"
+    >
     <input
       v-model="value"
       type="text"

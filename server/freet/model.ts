@@ -13,6 +13,7 @@ export type Freet = {
   authorId: Types.ObjectId;
   dateCreated: Date;
   content: string;
+  highlighted: boolean;
   dateModified: Date;
 };
 
@@ -21,6 +22,7 @@ export type PopulatedFreet = {
   authorId: User;
   dateCreated: Date;
   content: string;
+  highlighted: boolean;
   dateModified: Date;
 };
 
@@ -43,6 +45,10 @@ const FreetSchema = new Schema<Freet>({
   // The content of the freet
   content: {
     type: String,
+    required: true
+  },
+  highlighted: {
+    type: Boolean,
     required: true
   },
   // The date the freet was modified

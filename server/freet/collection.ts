@@ -17,14 +17,16 @@ class FreetCollection {
    *
    * @param {string} authorId - The id of the author of the freet
    * @param {string} content - The id of the content of the freet
+   * @param {boolean} highlighted - Whether the freet is highlighted
    * @return {Promise<HydratedDocument<Freet>>} - The newly created freet
    */
-  static async addOne(authorId: Types.ObjectId | string, content: string): Promise<HydratedDocument<Freet>> {
+  static async addOne(authorId: Types.ObjectId | string, content: string, highlighted: boolean): Promise<HydratedDocument<Freet>> {
     const date = new Date();
     const freet = new FreetModel({
       authorId,
       dateCreated: date,
       content,
+      highlighted,
       dateModified: date
     });
     await freet.save(); // Saves freet to MongoDB
@@ -55,23 +57,35 @@ class FreetCollection {
    * Get all the freets in by given author
    *
    * @param {string} username - The username of author of the freets
+   * @param {boolean} highlighted
    * @return {Promise<HydratedDocument<Freet>[]>} - An array of all of the freets
    */
-  static async findAllByUsername(username: string): Promise<Array<HydratedDocument<Freet>>> {
+  static async findAllByUsername(username: string, highlighted: boolean): Promise<Array<HydratedDocument<Freet>>> {
     const author = await UserCollection.findOneByUsername(username);
-    return FreetModel.find({authorId: author._id}).sort({dateModified: -1}).populate('authorId');
+    return FreetModel.find(highlighted ? {authorId: author._id, highlighted: highlighted} : {authorId: author._id}).sort({dateModified: -1}).populate('authorId');
   }
 
   /**
-   * Update a freet with the new content
+   * Get all the highlighted freets
+   *
+   * @return {Promise<HydratedDocument<Freet>[]>} - An array of all of the freets
+   */
+   static async findAllHighlights(): Promise<Array<HydratedDocument<Freet>>> {
+    return FreetModel.find({highlighted: true}).sort({dateModified: -1}).populate('authorId');
+  }
+
+  /**
+   * Update a freet with the new content/highlighted status
    *
    * @param {string} freetId - The id of the freet to be updated
    * @param {string} content - The new content of the freet
+   * @param {boolean} highlighted - the new highlighted state of freet
    * @return {Promise<HydratedDocument<Freet>>} - The newly updated freet
    */
-  static async updateOne(freetId: Types.ObjectId | string, content: string): Promise<HydratedDocument<Freet>> {
+  static async updateOne(freetId: Types.ObjectId | string, content: string, highlighted: boolean): Promise<HydratedDocument<Freet>> {
     const freet = await FreetModel.findOne({_id: freetId});
     freet.content = content;
+    freet.highlighted = highlighted;
     freet.dateModified = new Date();
     await freet.save();
     return freet.populate('authorId');
