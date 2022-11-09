@@ -15,6 +15,7 @@ export default {
   methods: {
     async submit() {
       const url = this.value ? `/api/freets?author=${this.value}&highlighted=${this.highlights}` : `/api/freets?highlighted=${this.highlights}`;
+      console.log(this.highlights);
       try {
         const r = await fetch(url);
         const res = await r.json();
@@ -23,6 +24,7 @@ export default {
         }
 
         this.$store.commit('updateFilter', this.value);
+        this.$store.commit('updateHighlightFilter', this.highlights);
         this.$store.commit('updateFreets', res);
       } catch (e) {
         if (this.value === this.$store.state.filter) {

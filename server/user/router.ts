@@ -29,6 +29,27 @@ router.get(
 );
 
 /**
+ * Get the signed in user
+ * TODO: may need better route and documentation
+ * (so students don't accidentally delete this when copying over)
+ *
+ * @name GET /api/users/
+ *
+ * @return - currently logged in user, or null if not logged in
+ */
+ router.get(
+  '/',
+  [
+    userValidator.isUserLoggedIn
+  ],
+  async (req: Request, res: Response) => {
+    const allUsers = await UserCollection.findAll();
+    const response = allUsers.map(util.constructUserResponse);
+    res.status(200).json(response);
+  }
+);
+
+/**
  * Sign in user.
  *
  * @name POST /api/users/session

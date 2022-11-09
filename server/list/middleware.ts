@@ -26,8 +26,8 @@ const isListExists = async (req: Request, res: Response, next: NextFunction) => 
  * Checks if all the contents of the list in req.body is given
  */
  const isListContentsNonempty = (req: Request, res: Response, next: NextFunction) => {
-  const {name, privacy, members} = req.body as {name: string, privacy: string, members: string};
-  if (!(name.trim() && privacy && members)) {
+  const {listName, privacy, members} = req.body as {listName: string, privacy: string, members: Array<string>};
+  if (!(listName.trim() && privacy && members)) {
     res.status(404).json({
       error: 'List content (name/privacy/members) is missing.'
     });
@@ -41,16 +41,17 @@ const isListExists = async (req: Request, res: Response, next: NextFunction) => 
  * Checks if the contents of the list in req.body is valid
  */
 const isValidListContents = async (req: Request, res: Response, next: NextFunction) => {
-  const {name, privacy, members} = req.body as {name: string, privacy: string, members: string};
-  if (name) {
-    if (!name.trim()) {
+  const {listName, privacy, members} = req.body as {listName: string, privacy: string, members: Array<string>};
+  console.log(req.body);
+  if (listName) {
+    if (!listName.trim()) {
       res.status(400).json({
         error: 'List name must be at least one character long.'
       });
       return;
     }
 
-    if (name.trim().length > 25) {
+    if (listName.trim().length > 25) {
       res.status(413).json({
         error: 'List name must be no more than 25 characters.'
       });
@@ -68,7 +69,7 @@ const isValidListContents = async (req: Request, res: Response, next: NextFuncti
   }
 
   if (members) {
-    for (const member of members.split('\n')) {
+    for (const member of members) {
       const user = await UserCollection.findOneByUsername(member);
       if (!user) {
         res.status(404).json({
@@ -110,17 +111,39 @@ const isValidListModifier = async (req: Request, res: Response, next: NextFuncti
  * Checks if a list with listName as name in req.body exists
  */
  const isListNameExists = async (req: Request, res: Response, next: NextFunction) => {
-  if (!req.body.name) {
+  if (!req.query.listName) {
+    res.status(400).json({
+      error: 'Provided list name must be nonempty.'
+    });
+    return;
+  }
+  const owner = await UserCollection.findOneByUsername(req.query.owner as string);
+  const list = await ListCollection.findOneByListName(owner._id, req.query.listName as string);
+  if (!list) {
+    res.status(404).json({
+      error: `A list with list name ${req.query.listName as string} does not exist.`
+    });
+    return;
+  }
+
+  next();
+};
+
+/**
+ * Checks if a list with listName as name in req.body exists
+ */
+ const isValidListName = async (req: Request, res: Response, next: NextFunction) => {
+  if (!req.body.listName) {
     res.status(400).json({
       error: 'Provided list name must be nonempty.'
     });
     return;
   }
 
-  const list = await ListCollection.findOneByListName(req.session.userId, req.body.name as string);
+  const list = await ListCollection.findOneByListName(req.session.userId, req.body.listName as string);
   if (list) {
     res.status(404).json({
-      error: `A list with list name ${req.body.name as string} already exists.`
+      error: `A list with list name ${req.body.listName as string} already exists.`
     });
     return;
   }
@@ -133,5 +156,6 @@ export {
   isValidListContents,
   isListExists,
   isListNameExists,
+  isValidListName,
   isValidListModifier,
 };

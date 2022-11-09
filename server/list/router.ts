@@ -41,10 +41,24 @@ router.get(
   [
     userValidator.isOwnerExists
   ],
-  async (req: Request, res: Response) => {
+  async (req: Request, res: Response, next: NextFunction) => {
+    if (req.query.listName !== undefined) {
+      next();
+      console.log('here');
+      return;
+    }
     const ownerLists = await ListCollection.findAllByUsername(req.query.owner as string);
     const response = ownerLists.map(util.constructListResponse);
     res.status(200).json(response);
+  },
+  [
+    listValidator.isListNameExists
+  ],
+  async (req: Request, res: Response) => {
+    console.log('herea');
+    const user = await UserCollection.findOneByUsername(req.query.owner as string);
+    const list = await ListCollection.findOneByListName(user._id, req.query.listName as string);
+    res.status(200).json(util.constructListResponse(list));
   }
 );
 
@@ -70,12 +84,13 @@ router.post(
     listValidator.isValidListContents,
   ],
   async (req: Request, res: Response) => {
+    console.log(req.body);
     const ownerId = (req.session.userId as string) ?? ''; // Will not be an empty string since its validated in isUserLoggedIn
-    const memberIds = await Promise.all(req.body.members.split('\n').map(async (member: string) => {
+    const memberIds = await Promise.all(req.body.members.map(async (member: string) => {
       const user = await UserCollection.findOneByUsername(member);
       return user._id.toString();
     }));
-    const list = await ListCollection.addOne(ownerId, req.body.name, req.body.privacy, memberIds);
+    const list = await ListCollection.addOne(ownerId, req.body.listName, req.body.privacy, memberIds);
 
     res.status(201).json({
       message: 'Your list was created successfully.',
@@ -98,7 +113,7 @@ router.delete(
   '/:listId?',
   [
     userValidator.isUserLoggedIn,
-    listValidator.isListExists,
+    listValidator.isValidListName,
     listValidator.isValidListModifier
   ],
   async (req: Request, res: Response) => {
@@ -126,16 +141,16 @@ router.put(
   '/:listId?',
   [
     userValidator.isUserLoggedIn,
-    listValidator.isListExists,
+    listValidator.isValidListName,
     listValidator.isValidListModifier,
     listValidator.isValidListContents
   ],
   async (req: Request, res: Response) => {
-    const memberIds = req.body.members ? await Promise.all(req.body.members.split('\n').map(async (member: string) => {
+    const memberIds = await Promise.all(req.body.members.map(async (member: string) => {
       const user = await UserCollection.findOneByUsername(member);
       return user._id;
-    })) : undefined;
-    const list = await ListCollection.updateOne(req.params.listId, req.body.name, req.body.privacy, memberIds);
+    }));
+    const list = await ListCollection.updateOne(req.params.listId, req.body.listName, req.body.privacy, memberIds);
     res.status(200).json({
       message: 'Your list was updated successfully.',
       list: util.constructListResponse(list)

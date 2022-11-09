@@ -31,6 +31,7 @@ export default {
 <style>
 * {
   box-sizing: border-box;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
 }
 
 body {
@@ -73,5 +74,10 @@ main {
 
 .alerts .success {
     background-color: rgb(45, 135, 87);
+}
+
+.content {
+    padding-left: 280px;
+    margin: auto;
 }
 </style>

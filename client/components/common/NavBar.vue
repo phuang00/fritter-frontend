@@ -11,9 +11,6 @@
       </h1>
     </div>
     <div class="right">
-      <router-link to="/">
-        Home
-      </router-link>
       <router-link
         v-if="$store.state.username"
         to="/account"
@@ -47,6 +44,7 @@ nav {
     justify-content: space-between;
     align-items: center;
     position: relative;
+    z-index: 1;
 }
 
 .title {

@@ -3,7 +3,9 @@
 
 <template>
   <main>
-    <section>
+    <SideBar />
+    <div class="content">
+      <section>
       <header>
         <h2>Account settings for @{{ $store.state.username }}</h2>
       </header>
@@ -17,6 +19,7 @@
       <LogoutForm />
       <DeleteAccountForm />
     </section>
+    </div>
   </main>
 </template>
 
@@ -25,6 +28,7 @@ import ChangeUsernameForm from '@/components/Account/ChangeUsernameForm.vue';
 import ChangePasswordForm from '@/components/Account/ChangePasswordForm.vue';
 import DeleteAccountForm from '@/components/Account/DeleteAccountForm.vue';
 import LogoutForm from '@/components/Account/LogoutForm.vue';
+import SideBar from '@/components/common/SideBar.vue';
 
 export default {
   name: 'AccountPage',
@@ -32,7 +36,8 @@ export default {
     ChangeUsernameForm,
     ChangePasswordForm,
     DeleteAccountForm,
-    LogoutForm
+    LogoutForm,
+    SideBar
   }
 };
 </script>

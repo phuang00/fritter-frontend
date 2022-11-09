@@ -34,7 +34,7 @@ router.get(
       return;
     }
 
-    const allFreets = await (req.query.highlighted ? FreetCollection.findAllHighlights() : FreetCollection.findAll());
+    const allFreets = await (req.query.highlighted === 'true' ? FreetCollection.findAllHighlights() : FreetCollection.findAll());
     const response = allFreets.map(util.constructFreetResponse);
     res.status(200).json(response);
   },

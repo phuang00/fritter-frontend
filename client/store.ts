@@ -12,6 +12,9 @@ const store = new Vuex.Store({
     filter: null, // Username to filter shown freets by (null = show all)
     highlightsOnly: false, // Filter shown freets by highlights
     freets: [], // All freets created in the app
+    lists: [], // All lists created in the app
+    listFilter: null, //Username to filter shown lists by (null = show all)
+    users: [], // All users created in the app
     username: null, // Username of the logged in user
     alerts: {} // global success/error messages encountered during submissions to non-visible forms
   },
@@ -56,6 +59,25 @@ const store = new Vuex.Store({
       const url = state.filter ? `/api/freets?author=${state.filter}&highlighted=${state.highlightsOnly}` : `/api/freets?highlighted=${state.highlightsOnly}`;
       const res = await fetch(url).then(async r => r.json());
       state.freets = res;
+    },
+    updateListFilter(state, filter) {
+      state.listFilter = filter;
+    },
+    updateLists(state, lists) {
+      state.lists = lists;
+    },
+    async refreshLists(state) {
+      const url = state.listFilter ? `api/lists?owner=${state.listFilter}` : 'api/lists';
+      const res = await fetch(url).then(async r => r.json());
+      state.lists = res;
+    },
+    updateUsers(state, users) {
+      state.users = users;
+    },
+    async refreshUsers(state) {
+      const url = 'api/users';
+      const res = await fetch(url).then(async r => r.json());
+      state.users = res;
     }
   },
   // Store data across page refreshes, only discard on browser close

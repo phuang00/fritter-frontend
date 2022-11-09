@@ -25,6 +25,27 @@
           :checked="field.value"
           @input="field.value = $event.target.checked"
         >
+        <select 
+          v-else-if="field.id === 'members'"
+          :name="field.id"
+          v-model="field.value" :multiple="true">
+          <template v-for="user in $store.state.users">
+            <option v-if="user.username !== $store.state.username"
+            :value="user.username"
+          >
+            {{user.username}}
+            </option>
+          </template>
+          
+        </select>
+        <select 
+          v-else-if="field.id === 'privacy'"
+          :name="field.id"
+          :value="field.value"
+          @input="field.value = $event.target.value">
+          <option :selected="field.id === 'public'" value="public">Public</option>
+          <option :selected="field.id === 'private'" value="private">Private</option>
+        </select>
         <input
           v-else
           :type="field.id === 'password' ? 'password' : 'text'"
@@ -68,6 +89,7 @@ export default {
       hasBody: false, // Whether or not form request has a body
       setUsername: false, // Whether or not stored username should be updated after form submission
       refreshFreets: false, // Whether or not stored freets should be updated after form submission
+      refreshLists: false, // Wehterer or not stored lists should be updated after form submission
       alerts: {}, // Displays success/error messages encountered during form submission
       callback: null // Function to run after successful form submission
     };
@@ -86,7 +108,10 @@ export default {
         options.body = JSON.stringify(Object.fromEntries(
           this.fields.map(field => {
             const {id, value} = field;
-            field.value = '';
+            if (id === 'members') {field.value = [];}
+            else if (id === 'privacy') {field.value = 'public';}
+            else {field.value = '';}
+            console.log(field);
             return [id, value];
           })
         ));
@@ -104,10 +129,15 @@ export default {
           const text = await r.text();
           const res = text ? JSON.parse(text) : {user: null};
           this.$store.commit('setUsername', res.user ? res.user.username : null);
+          this.$store.commit('refreshUsers');
         }
 
         if (this.refreshFreets) {
           this.$store.commit('refreshFreets');
+        }
+
+        if (this.refreshLists) {
+          this.$store.commit('refreshLists');
         }
 
         if (this.callback) {

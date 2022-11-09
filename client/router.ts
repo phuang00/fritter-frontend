@@ -3,6 +3,11 @@ import VueRouter from 'vue-router';
 import FreetsPage from './components/Freet/FreetsPage.vue';
 import AccountPage from './components/Account/AccountPage.vue';
 import LoginPage from './components/Login/LoginPage.vue';
+import ListPage from './components/List/ListPage.vue';
+import ListsPage from './components/List/ListsPage.vue';
+import NotifsPage from './components/Notification/NotifsPage.vue';
+import PresetsPage from './components/Preset/PresetsPage.vue';
+import ProfilePage from './components/Profile/ProfilePage.vue';
 import NotFound from './NotFound.vue';
 
 Vue.use(VueRouter);
@@ -10,7 +15,12 @@ Vue.use(VueRouter);
 const routes = [
   {path: '/', name: 'Home', component: FreetsPage},
   {path: '/account', name: 'Account', component: AccountPage},
+  {path: '/lists/:owner/:listName', name: 'List', component: ListPage},
+  {path: '/lists', name: 'Lists', component: ListsPage},
   {path: '/login', name: 'Login', component: LoginPage},
+  {path: '/notifs', name: 'Notifications', component: NotifsPage},
+  {path: '/presets', name: 'Presets', component: PresetsPage},
+  {path: '/profile', name: 'Profile', component: ProfilePage},
   {path: '*', name: 'Not Found', component: NotFound}
 ];
 
