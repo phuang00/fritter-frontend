@@ -3,62 +3,76 @@
 
 <template>
   <form @submit.prevent="submit">
+    
     <h3>{{ title }}</h3>
-    <article
+    <article class="form-inline"
       v-if="fields.length"
     >
       <div
         v-for="field in fields"
         :key="field.id"
       >
-        <label :for="field.id">{{ field.label }}:</label>
-        <textarea
-          v-if="field.id === 'content'"
-          :name="field.id"
-          :value="field.value"
-          @input="field.value = $event.target.value"
-        />
-        <input
-          v-else-if="field.id === 'highlighted'"
-          :type="'checkbox'"
-          :name="field.id"
-          :checked="field.value"
-          @input="field.value = $event.target.checked"
-        >
-        <select 
-          v-else-if="field.id === 'members'"
-          :name="field.id"
-          v-model="field.value" :multiple="true">
-          <template v-for="user in $store.state.users">
-            <option v-if="user.username !== $store.state.username"
-            :value="user.username"
+        <div class="row">
+          <label :class="`form-label ${['username', 'password'].includes(field.label) ? 'col-2': 'col-auto'}`" :for="field.id">{{ field.label }}:</label>
+        <div class="col">
+          <textarea class="form-control"
+            v-if="field.id === 'content'"
+            :name="field.id"
+            :value="field.value"
+            @input="field.value = $event.target.value"
+          />
+          <input
+            v-else-if="field.id === 'highlighted'"
+            :type="'checkbox'"
+            :name="field.id"
+            :checked="field.value"
+            @input="field.value = $event.target.checked"
           >
-            {{user.username}}
-            </option>
-          </template>
-          
-        </select>
-        <select 
-          v-else-if="field.id === 'privacy'"
-          :name="field.id"
-          :value="field.value"
-          @input="field.value = $event.target.value">
-          <option :selected="field.id === 'public'" value="public">Public</option>
-          <option :selected="field.id === 'private'" value="private">Private</option>
-        </select>
-        <input
-          v-else
-          :type="field.id === 'password' ? 'password' : 'text'"
-          :name="field.id"
-          :value="field.value"
-          @input="field.value = $event.target.value"
-        >
+          <select class="form-control"
+            v-else-if="field.id === 'members'"
+            :name="field.id"
+            v-model="field.value" :multiple="true">
+            <template v-for="user in $store.state.users">
+              <option v-if="user.username !== $store.state.username && !$store.state.presets.map((preset) => preset.members).flat().includes(user.username) "
+              :value="user.username"
+            >
+              {{user.username}}
+              </option>
+            </template>
+            
+          </select>
+          <select class="form-control"
+            v-else-if="field.id === 'privacy'"
+            :name="field.id"
+            :value="field.value"
+            @input="field.value = $event.target.value">
+            <option :selected="field.id === 'public'" value="public">Public</option>
+            <option :selected="field.id === 'private'" value="private">Private</option>
+          </select>
+          <select class="form-control"
+            v-else-if="field.id === 'setting'"
+            :name="field.id"
+            v-model="field.value"
+            >
+            <option value="highlight">Highlights Only</option>
+            <option value="freet">All Freets</option>
+            <option value="none">No Notifications</option>
+          </select>
+          <input class="form-control"
+            v-else
+            :type="field.id === 'password' ? 'password' : 'text'"
+            :name="field.id"
+            :value="field.value"
+            @input="field.value = $event.target.value"
+          >
+          </div>
+        </div>
       </div>
     </article>
     <article v-else>
       <p>{{ content }}</p>
     </article>
-    <button
+    <button class="btn btn-primary"
       type="submit"
     >
       {{ title }}
@@ -110,8 +124,13 @@ export default {
             const {id, value} = field;
             if (id === 'members') {field.value = [];}
             else if (id === 'privacy') {field.value = 'public';}
+            else if (id === 'setting') {
+              // const newVal = new Map([['freet', field.value === 'freet'], ['highlight', field.value === 'highlight']]);
+              const newVal = {'freet': field.value === 'freet', 'highlight': field.value === 'highlight'};
+              field.value = 'none';
+              return [id, newVal];
+            }
             else {field.value = '';}
-            console.log(field);
             return [id, value];
           })
         ));
@@ -138,6 +157,14 @@ export default {
 
         if (this.refreshLists) {
           this.$store.commit('refreshLists');
+        }
+
+        if (this.refreshMyLists) {
+          this.$store.commit('refreshMyLists');
+        }
+
+        if (this.refreshPresets) {
+          this.$store.commit('refreshPresets');
         }
 
         if (this.callback) {
@@ -170,6 +197,10 @@ article > div {
 
 form > article p {
   margin: 0;
+}
+
+.row {
+  padding-top:5px;
 }
 
 form h3,

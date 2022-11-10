@@ -74,6 +74,10 @@ class PresetCollection {
     return PresetModel.find({ownerId: owner._id}).populate('ownerId').populate('members');
   }
 
+  static async findAllByUserId(userId: Types.ObjectId | string): Promise<Array<HydratedDocument<Preset>>> {
+    return PresetModel.find({ownerId: userId}).populate('ownerId').populate('members');
+  }
+
   /**
    * Update a preset with the new states
    *

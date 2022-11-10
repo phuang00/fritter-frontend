@@ -6,39 +6,19 @@
     class="freet"
   >
     <header>
-      <h3 class="author">
-        @{{ freet.author }}
-      </h3>
-      <div
-        v-if="$store.state.username === freet.author"
-        class="actions"
-      >
-        <button
-          v-if="editing"
-          @click="submitEdit"
-        >
-          ✅ Save changes
-        </button>
-        <button
-          v-if="editing"
-          @click="stopEditing"
-        >
-          🚫 Discard changes
-        </button>
-        <button
-          v-if="!editing"
-          @click="startEditing"
-        >
-          ✏️ Edit
-        </button>
-        <button @click="deleteFreet">
-          🗑️ Delete
-        </button>
+      <div class="row">
+        <div class="col">
+          <h3 class="author">
+            @{{ freet.author }}
+          </h3>
+        </div>
+        <div class="col-1">
+          {{freet.highlighted ? '⭐️' : ''}}
+        </div>
       </div>
-    </header>
-    <div v-if="editing">
+      <div v-if="editing">
       <textarea
-        class="content"
+        class="freetContent"
         :value="draft"
         @input="draft = $event.target.value"
     />
@@ -52,17 +32,42 @@
     
     <p
       v-else
-      class="content"
+      class="freetContent"
     >
       {{ freet.content }}
-    </p>
-    <p v-if="freet.highlighted">
-      Highlight ⭐️
     </p>
     <p class="info">
       Posted at {{ freet.dateModified }}
       <i v-if="freet.edited">(edited)</i>
     </p>
+      <div
+        v-if="$store.state.username === freet.author"
+        class="actions"
+      >
+        <button class="btn btn-outline-secondary" 
+          v-if="editing"
+          @click="submitEdit"
+        >
+          ✅ Save changes
+        </button>
+        <button class="btn btn-outline-secondary" 
+          v-if="editing"
+          @click="stopEditing"
+        >
+          🚫 Discard changes
+        </button>
+        <button class="btn btn-outline-secondary"  
+          v-if="!editing"
+          @click="startEditing"
+        >
+          ✏️ Edit
+        </button>
+        <button class="btn btn-outline-secondary" @click="deleteFreet">
+          🗑️ Delete
+        </button>
+      </div>
+    </header>
+    
     <section class="alerts">
       <article
         v-for="(status, alert, index) in alerts"
@@ -185,5 +190,9 @@ export default {
     border: 1px solid #111;
     padding: 20px;
     position: relative;
+}
+
+button {
+  margin-right: 3px;
 }
 </style>

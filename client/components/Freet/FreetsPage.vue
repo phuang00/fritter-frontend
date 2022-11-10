@@ -48,7 +48,7 @@
         <article
           v-else
         >
-          <h3>No freets found.</h3>
+          <h3 class="notFound">No freets found.</h3>
         </article>
       </section>
     </div>

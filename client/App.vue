@@ -79,5 +79,15 @@ main {
 .content {
     padding-left: 280px;
     margin: auto;
+    width: 100%;
+}
+
+h2 {
+  padding-bottom: 20px;
+  padding-top: 30px;
+}
+
+.notFound {
+  text-align: center;
 }
 </style>

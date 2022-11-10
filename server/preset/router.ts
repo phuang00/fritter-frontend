@@ -55,7 +55,7 @@ router.get(
  *
  * @param {string} name - The name of the preset
  * @param {Array<string>} members - The members in the preset
- * @param {Map<string, boolean>} setting - The settings of the preset
+ * @param {Map<string, boolean>} setting - The setting of the preset
  * @return {PresetResponse} - The created preset
  * @throws {403} - If the user is not logged in
  * @throws {400} - If the preset content is empty or a stream of empty spaces
@@ -71,12 +71,11 @@ router.post(
   ],
   async (req: Request, res: Response) => {
     const ownerId = (req.session.userId as string) ?? ''; // Will not be an empty string since its validated in isUserLoggedIn
-    const memberIds = await Promise.all(req.body.members.split('\n').map(async (member: string) => {
+    const memberIds = await Promise.all(req.body.members.map(async (member: string) => {
       const user = await UserCollection.findOneByUsername(member);
       return user._id.toString();
     }));
-    const setting = new Map<string, boolean>([["freet", req.body.freetSetting === 'true'], ["highlight", req.body.highlightSetting === 'true']]);
-    const preset = await PresetCollection.addOne(ownerId, req.body.name, memberIds, setting);
+    const preset = await PresetCollection.addOne(ownerId, req.body.name, memberIds, req.body.setting);
 
     res.status(201).json({
       message: 'Your preset was created successfully.',
@@ -132,12 +131,11 @@ router.put(
     presetValidator.isValidPresetContents
   ],
   async (req: Request, res: Response) => {
-    const memberIds = req.body.members ? await Promise.all(req.body.members.split('\n').map(async (member: string) => {
+    const memberIds = await Promise.all(req.body.members.map(async (member: string) => {
       const user = await UserCollection.findOneByUsername(member);
       return user._id;
-    })) : undefined;
-    const setting = req.body.freetSetting && req.body.highlightSetting ? new Map<string, boolean>([["freet", req.body.freetSetting === 'true'], ["highlight", req.body.highlightSetting === 'true']]) : undefined;
-    const preset = await PresetCollection.updateOne(req.params.presetId, req.body.name, memberIds, setting );
+    }));
+    const preset = await PresetCollection.updateOne(req.params.presetId, req.body.name, memberIds, req.body.setting );
     res.status(200).json({
       message: 'Your preset was updated successfully.',
       preset: util.constructPresetResponse(preset)

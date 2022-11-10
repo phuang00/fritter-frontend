@@ -14,19 +14,11 @@
       <section>
         <header>
         </header>
-        <section
-          v-if="$store.state.lists.length"
-        >
-          <ListComponent
-            v-for="list in $store.state.lists"
-            :key="list.id"
-            :list="list"
-          />
+        <section v-if="$store.state.myLists.length">
+          <ListComponent v-for="list in $store.state.myLists" :key="list.id" :list="list" />
         </section>
-        <article
-          v-else
-        >
-          <h3>No lists found.</h3>
+        <article v-else>
+          <h3 class="notFound">No lists found.</h3>
         </article>
       </section>
     </div>
@@ -42,7 +34,21 @@ export default {
   name: 'ListsPage',
   components: { SideBar, CreateListForm, ListComponent },
   mounted() {
-    this.$store.commit("refreshUsers");
-  }
+    this.$store.commit('refreshMyLists');
+  },
 };
 </script>
+
+<style scoped>
+header,
+header>* {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+h2 {
+  margin-left: auto;
+  margin-right: auto;
+}
+</style>

@@ -4,22 +4,22 @@
 import BlockForm from '@/components/common/BlockForm.vue';
 
 export default {
-  name: 'CreateListForm',
+  name: 'CreatePresetForm',
   mixins: [BlockForm],
   data() {
     return {
-      url: '/api/lists',
+      url: '/api/presets',
       method: 'POST',
       hasBody: true,
       fields: [
-        {id: 'listName', label: 'List Name', value: ''},
-        {id: 'privacy', label: 'Privacy', value: 'public'},
-        {id: 'members', label: 'Members', value: []}
+        {id: 'name', label: 'Preset Name', value: ''},
+        {id: 'members', label: 'Members', value: []},
+        {id: 'setting', label: 'Settings', value: 'none'}
       ],
-      title: 'Create a list',
-      refreshMyLists: true,
+      title: 'Create a preset',
+      refreshPresets: true,
       callback: () => {
-        const message = 'Successfully created a list!';
+        const message = 'Successfully created a preset!';
         this.$set(this.alerts, message, 'success');
         setTimeout(() => this.$delete(this.alerts, message), 3000);
       }

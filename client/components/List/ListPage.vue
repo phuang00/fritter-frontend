@@ -5,21 +5,25 @@
         <SideBar />
         <div class="content">
             <section>
+                <h2>List: {{$route.params.listName}}</h2>
+                <p>Owner: {{$route.params.owner}}</p>
+            </section>
+            <section>
                 <header>
                     <div class="left">
-                        <h2 :style="{ 'font-weight': $store.state.highlightsOnly ? 'normal' : 'bold' }"
-                            @click.prevent="getHighlights(false)">Freets</h2>
+                        <h3 :style="{ 'font-weight': $store.state.highlightsOnly ? 'normal' : 'bold' }"
+                            @click.prevent="getHighlights(false)">Freets</h3>
                     </div>
                     <div class="right">
-                        <h2 :style="{ 'font-weight': $store.state.highlightsOnly ? 'bold' : 'normal' }"
-                            @click.prevent="getHighlights(true)">Highlight</h2>
+                        <h3 :style="{ 'font-weight': $store.state.highlightsOnly ? 'bold' : 'normal' }"
+                            @click.prevent="getHighlights(true)">Highlight</h3>
                     </div>
                 </header>
                 <section v-if="freets">
                     <FreetComponent v-for="freet in freets" :key="freet.id" :freet="freet" />
                 </section>
                 <article v-else>
-                    <h3>No freets found.</h3>
+                    <h3 class="notFound">No freets found.</h3>
                 </article>
             </section>
         </div>
@@ -48,9 +52,15 @@ export default {
     methods: {
         async getList(owner, listName) {
             const url = `/api/lists?owner=${owner}&listName=${listName}`;
-            const res = await fetch(url).then(async r => r.json());
-            this.list = res;
-            this.freets = this.$store.state.freets.filter(freet => this.list.members.includes(freet.author));
+            try {
+                const res = await fetch(url).then(async r => r.json());
+                this.list = res;
+                this.freets = this.$store.state.freets.filter(freet => this.list.members.includes(freet.author));
+            } catch (e) {
+                this.$set(this.alerts, e, 'error');
+                setTimeout(() => this.$delete(this.alerts, e), 3000);
+            }
+
         },
         async getHighlights(highlights) {
             const url = `/api/freets?highlighted=${highlights}`;
@@ -104,7 +114,7 @@ section .scrollbox {
 
 .left,
 .right {
-    width: 50%;
+    margin: auto;
 }
 
 h2 {

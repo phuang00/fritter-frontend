@@ -14,7 +14,7 @@
       type="text"
       :placeholder="placeholder"
     >
-    <button
+    <button class="btn btn-primary"
       type="submit"
     >
       {{ button }}

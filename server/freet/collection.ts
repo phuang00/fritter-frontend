@@ -2,6 +2,7 @@ import type {HydratedDocument, Types} from 'mongoose';
 import type {Freet} from './model';
 import FreetModel from './model';
 import UserCollection from '../user/collection';
+import PresetCollection from '../preset/collection';
 
 /**
  * This files contains a class that has the functionality to explore freets
@@ -109,6 +110,36 @@ class FreetCollection {
    */
   static async deleteMany(authorId: Types.ObjectId | string): Promise<void> {
     await FreetModel.deleteMany({authorId});
+  }
+
+  static async findAllNotifs(authorId: Types.ObjectId): Promise<Array<HydratedDocument<Freet>>> {
+    const presets = await PresetCollection.findAllByUserId(authorId);
+    const threeDaysAgo = new Date();
+    threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+    const query = [];
+    for (const preset of presets) {
+      if (!preset.setting.get('freet') && ! preset.setting.get('highlight')) {
+        continue;
+      }
+      if (preset.setting.get('freet')) {
+        query.push({
+          authorId: { $in: preset.members },
+          dateModified: { $gte : threeDaysAgo}
+        });
+      } else {
+        query.push({
+          authorId: { $in: preset.members },
+          highlighted: true,
+          dateModified: { $gte : threeDaysAgo}
+        });
+      }
+
+    }
+    if (query.length) {
+      return FreetModel.find({$or: query}).sort({dateModified: -1}).populate('authorId');
+    }
+    return [];
+    
   }
 }
 

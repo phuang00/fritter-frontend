@@ -25,8 +25,8 @@ const isPresetExists = async (req: Request, res: Response, next: NextFunction) =
  * Checks if all the contents of the preset in req.body is given
  */
  const isPresetContentsNonempty = (req: Request, res: Response, next: NextFunction) => {
-  const {name, members, freetSetting, highlightSetting} = req.body as {name: string, members: Array<string>, freetSetting: string, highlightSetting: string};
-  if (!(name.trim() && members && freetSetting && highlightSetting)) {
+  const {name, members, setting} = req.body as {name: string, members: Array<string>, setting: Map<string, boolean>};
+  if (!(name.trim() && members && setting)) {
     res.status(404).json({
       error: 'Preset content (name/members/setting) is missing.'
     });
@@ -40,7 +40,7 @@ const isPresetExists = async (req: Request, res: Response, next: NextFunction) =
  * Checks if the contents of the preset in req.body is valid
  */
 const isValidPresetContents = async (req: Request, res: Response, next: NextFunction) => {
-  const {name, members, freetSetting, highlightSetting} = req.body as {name: string, members: string, freetSetting: string, highlightSetting: string};
+  const {name, members, setting} = req.body as {name: string, members: Array<string>, setting: Object};
   if (name) {
     if (!name.trim()) {
       res.status(400).json({
@@ -58,7 +58,7 @@ const isValidPresetContents = async (req: Request, res: Response, next: NextFunc
   }
 
   if (members) {
-    for (const member of members.split('\n')) {
+    for (const member of members) {
       const user = await UserCollection.findOneByUsername(member);
       if (!user) {
         res.status(404).json({
@@ -76,27 +76,16 @@ const isValidPresetContents = async (req: Request, res: Response, next: NextFunc
       }
     }
   }
-
-  if ((freetSetting && !highlightSetting) || (!freetSetting && highlightSetting)) {
-    res.status(404).json({
-      error: 'Preset settings cannot be partially filled.'
-    });
-    return;
-  }
-
-  if (freetSetting) {
-    if (freetSetting !== 'true' && freetSetting !== 'false') {
-      res.status(400).json({
-        error: 'Preset settings must be either true or false.'
+  if (setting) {
+    if (!(setting.hasOwnProperty('freet')) || !(setting.hasOwnProperty('highlight'))) {
+      res.status(404).json({
+        error: 'Preset setting cannot be partially filled.'
       });
       return;
     }
-  }
-
-  if (highlightSetting) {
-    if (freetSetting !== 'true' && freetSetting !== 'false') {
-      res.status(400).json({
-        error: 'Preset settings must be either true or false.'
+    if (Object.entries(setting).every(val => val[1] === true)) {
+      res.status(403).json({
+        error: 'Cannot show both all freets and highlights only.'
       });
       return;
     }

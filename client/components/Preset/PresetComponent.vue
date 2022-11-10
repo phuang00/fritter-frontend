@@ -2,18 +2,14 @@
 <!-- We've tagged some elements with classes; consider writing CSS using those classes to style them... -->
 
 <template>
-    <article class="list">
+    <article class="preset">
         <header>
             <input v-if="editing" 
                 :value="draftName" @input="draftName = $event.target.value" />
-            <router-link v-else
-                class="name" :to="`lists/${list.owner}/${list.listName}`">
-                {{ list.listName }}
-            </router-link>
-            <p>
-                {{list.owner}}
-            </p>
-            <div v-if="$store.state.username === list.owner" class="actions">
+            <h3 v-else>
+                {{preset.name}}
+            </h3>
+            <div v-if="$store.state.username === preset.owner" class="actions">
                 <button v-if="editing" @click="submitEdit">
                     ✅ Save changes
                 </button>
@@ -23,7 +19,7 @@
                 <button v-if="!editing" @click="startEditing">
                     ✏️ Edit
                 </button>
-                <button @click="deleteList">
+                <button @click="deletePreset">
                     🗑️ Delete
                 </button>
             </div>
@@ -42,14 +38,17 @@
                 
             </select>
             <select 
-                v-model="draftPrivacy">
-                <option>public</option>
-                <option>private</option>
+                v-model="draftSettings">
+                <option value="highlight">Highlights Only</option>
+                <option value="freet">All Freets</option>
+                <option value="none">No Notifications</option>
             </select>
         </div>
 
-        <p v-else class="privacy">
-            {{ list.privacy }}
+        <p v-else class="setting">
+            Members: {{preset.members.join(', ')}}
+            <br/>
+            {{ preset.setting === 'highlight' ? "HighlightsOnly" : preset.setting === 'freet' ? 'All Freets' : 'No Notifications' }}
         </p>
         <section class="alerts">
             <article v-for="(status, alert, index) in alerts" :key="index" :class="status">
@@ -61,10 +60,10 @@
   
 <script>
 export default {
-    name: 'ListComponent',
+    name: 'PresetComponent',
     props: {
-        // Data from the stored list
-        list: {
+        // Data from the stored preset
+        preset: {
             type: Object,
             required: true
         }
@@ -72,9 +71,9 @@ export default {
     data() {
         return {
             editing: false, // Whether or not this freet is in edit mode
-            draftName: this.list.listName, // Potentially-new content for this freet
-            draftPrivacy: this.list.privacy,
-            draftMembers: this.list.members,
+            draftName: this.preset.name, // Potentially-new content for this freet
+            draftSettings: this.preset.setting.freets ? 'freet' : (this.preset.setting.highlight ? 'highlight': 'none'),
+            draftMembers: this.preset.members,
             alerts: {} // Displays success/error messages encountered during freet modification
         };
     },
@@ -84,28 +83,28 @@ export default {
              * Enables edit mode on this freet.
              */
             this.editing = true; // Keeps track of if a freet is being edited
-            this.draftName = this.list.listName; // The content of our current "draft" while being edited
-            this.draftPrivacy= this.list.privacy;
-            this.draftMembers= this.list.members;
+            this.draftName = this.preset.name; // The content of our current "draft" while being edited
+            this.draftSettings= this.preset.setting.freets ? 'freet' : (this.preset.setting.highlight ? 'highlight': 'none');
+            this.draftMembers= this.preset.members;
         },
         stopEditing() {
             /**
              * Disables edit mode on this freet.
              */
             this.editing = false;
-            this.draftName = this.list.listName; 
-            this.draftPrivacy= this.list.privacy;
-            this.draftMembers= this.list.members;
+            this.draftName = this.preset.name; 
+            this.draftSettings= this.preset.setting.freets ? 'freet' : (this.preset.setting.highlight ? 'highlight': 'none');
+            this.draftMembers= this.preset.members;
         },
-        deleteList() {
+        deletePreset() {
             /**
-             * Deletes this list.
+             * Deletes this preset.
              */
             const params = {
                 method: 'DELETE',
                 callback: () => {
                     this.$store.commit('alert', {
-                        message: 'Successfully deleted list!', status: 'success'
+                        message: 'Successfully deleted preset!', status: 'success'
                     });
                 }
             };
@@ -115,8 +114,8 @@ export default {
             /**
              * Updates freet to have the submitted draft content.
              */
-            if (this.list.listName === this.draftName && this.list.privacy === this.draftPrivacy && this.list.members === this.draftMembers) {
-                const error = 'Error: Edited list content should be different than current list content.';
+            if (this.preset.name === this.draftName && this.preset.setting === this.draftSettings && this.preset.members === this.draftMembers) {
+                const error = 'Error: Edited preset content should be different than current preset content.';
                 this.$set(this.alerts, error, 'error'); // Set an alert to be the error text, timeout of 3000 ms
                 setTimeout(() => this.$delete(this.alerts, error), 3000);
                 return;
@@ -124,8 +123,8 @@ export default {
 
             const params = {
                 method: 'PUT',
-                message: 'Successfully edited list!',
-                body: JSON.stringify({ listName: this.draftName, privacy: this.draftPrivacy, members: this.draftMembers }),
+                message: 'Successfully edited preset!',
+                body: JSON.stringify({ name: this.draftName, setting: {'freet': this.draftSettings === 'freet', 'highlight': this.draftSettings === 'highlight'}, members: this.draftMembers }),
                 callback: () => {
                     this.$set(this.alerts, params.message, 'success');
                     setTimeout(() => this.$delete(this.alerts, params.message), 3000);
@@ -148,15 +147,14 @@ export default {
             }
 
             try {
-                const r = await fetch(`/api/lists/${this.list._id}`, options);
+                const r = await fetch(`/api/presets/${this.preset._id}`, options);
                 if (!r.ok) {
                     const res = await r.json();
                     throw new Error(res.error);
                 }
 
                 this.editing = false;
-                console.log('here');
-                this.$store.commit('refreshMyLists');
+                this.$store.commit('refreshPresets');
 
                 params.callback();
             } catch (e) {
@@ -169,7 +167,7 @@ export default {
 </script>
   
 <style scoped>
-.list {
+.preset {
     border: 1px solid #111;
     padding: 20px;
     position: relative;

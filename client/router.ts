@@ -8,6 +8,7 @@ import ListsPage from './components/List/ListsPage.vue';
 import NotifsPage from './components/Notification/NotifsPage.vue';
 import PresetsPage from './components/Preset/PresetsPage.vue';
 import ProfilePage from './components/Profile/ProfilePage.vue';
+import SearchPage from './components/Search/SearchPage.vue';
 import NotFound from './NotFound.vue';
 
 Vue.use(VueRouter);
@@ -20,7 +21,8 @@ const routes = [
   {path: '/login', name: 'Login', component: LoginPage},
   {path: '/notifs', name: 'Notifications', component: NotifsPage},
   {path: '/presets', name: 'Presets', component: PresetsPage},
-  {path: '/profile', name: 'Profile', component: ProfilePage},
+  {path: '/profile/:user', name: 'Profile', component: ProfilePage},
+  {path: '/search/:input', name: 'Search', component: SearchPage},
   {path: '*', name: 'Not Found', component: NotFound}
 ];
 

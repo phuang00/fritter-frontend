@@ -8,12 +8,13 @@ import { Privacy } from './model';
  * Checks if a list with listId is req.params exists
  */
 const isListExists = async (req: Request, res: Response, next: NextFunction) => {
-  const validFormat = Types.ObjectId.isValid(req.params.listId);
-  const list = validFormat ? await ListCollection.findOne(req.params.listId) : '';
+  const listId = req.params.listId ? req.params.listId : req.body.listId
+  const validFormat = Types.ObjectId.isValid(listId);
+  const list = validFormat ? await ListCollection.findOne(listId) : '';
   if (!list) {
     res.status(404).json({
       error: {
-        listNotFound: `List with list ID ${req.params.listId} does not exist.`
+        listNotFound: `List with list ID ${listId} does not exist.`
       }
     });
     return;
@@ -42,7 +43,6 @@ const isListExists = async (req: Request, res: Response, next: NextFunction) => 
  */
 const isValidListContents = async (req: Request, res: Response, next: NextFunction) => {
   const {listName, privacy, members} = req.body as {listName: string, privacy: string, members: Array<string>};
-  console.log(req.body);
   if (listName) {
     if (!listName.trim()) {
       res.status(400).json({

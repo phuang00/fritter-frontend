@@ -102,6 +102,10 @@ class UserCollection {
     const user = await UserModel.deleteOne({_id: userId});
     return user !== null;
   }
+
+  static async findAllBySearchInput(userId: Types.ObjectId | string, input: string): Promise<Array<HydratedDocument<User>>> {
+    return UserModel.find({username: { $regex: `${input}`, $options: "i" }}).find({_id: {$ne: userId}});
+  }
 }
 
 export default UserCollection;

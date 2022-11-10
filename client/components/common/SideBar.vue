@@ -10,30 +10,47 @@
         Home
       </router-link>
     </div>
-    <div class="page">
+    <template v-if="$store.state.username">
+      <div class="page">
         <router-link to="/lists"
-        :style="{ 'font-weight': $route.name === 'Lists' || $route.name === 'List' ? 'bold': 'normal' }">
-        Lists
-      </router-link>
-    </div>
-    <div class="page">
-        <router-link to="/notifs"
-        :style="{ 'font-weight': $route.name === 'Notifications' ? 'bold': 'normal' }">
-        Notifications
-      </router-link>
-    </div>    
-    <div class="page">
-        <router-link to="/presets"
-        :style="{ 'font-weight': $route.name === 'Presets' ? 'bold': 'normal' }">
-        Notification Presets
-      </router-link>
-    </div>
-    <div class="page">
-        <router-link to="/account"
-        :style="{ 'font-weight': $route.name === 'Account' ? 'bold': 'normal' }">
-        Account Settings
-      </router-link>
-    </div>
+          :style="{ 'font-weight': $route.name === 'Lists' || $route.name === 'List' ? 'bold': 'normal' }">
+          Lists
+        </router-link>
+      </div>
+      <div class="page">
+          <router-link :to="`/profile/${$store.state.username}`"
+            :style="{ 'font-weight': $route.name === 'Profile' && $route.params.user === $store.state.username ? 'bold': 'normal' }">       
+            Profile
+          </router-link>
+      </div>
+      <div class="page">
+          <router-link to="/notifs"
+          :style="{ 'font-weight': $route.name === 'Notifications' ? 'bold': 'normal' }">
+          Notifications
+        </router-link>
+      </div>    
+      <div class="page">
+          <router-link to="/presets"
+          :style="{ 'font-weight': $route.name === 'Presets' ? 'bold': 'normal' }">
+          Notification Presets
+        </router-link>
+      </div>
+      <div class="page">
+          <router-link to="/account"
+          :style="{ 'font-weight': $route.name === 'Account' ? 'bold': 'normal' }">
+          Account Settings
+        </router-link>
+      </div>
+
+    </template>
+    <template v-else>
+      <div class="page">
+        <router-link to="/login"
+          :style="{ 'font-weight': $route.name === 'Login' ? 'bold': 'normal' }">
+          Login
+        </router-link>
+      </div>
+    </template>
   </div>
 </template>
 
@@ -45,7 +62,7 @@
     z-index: 0;
     top: 0;
     left: 0;
-    background-color: aliceblue;
+    background-color: rgb(224, 242, 255);
     overflow-x: hidden;
     padding-top: 80px;
     text-align: center;

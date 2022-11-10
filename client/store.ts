@@ -13,8 +13,11 @@ const store = new Vuex.Store({
     highlightsOnly: false, // Filter shown freets by highlights
     freets: [], // All freets created in the app
     lists: [], // All lists created in the app
-    listFilter: null, //Username to filter shown lists by (null = show all)
+    myLists: [],
     users: [], // All users created in the app
+    presets: [],
+    search: [],
+    presetMembers: [],
     username: null, // Username of the logged in user
     alerts: {} // global success/error messages encountered during submissions to non-visible forms
   },
@@ -60,25 +63,35 @@ const store = new Vuex.Store({
       const res = await fetch(url).then(async r => r.json());
       state.freets = res;
     },
-    updateListFilter(state, filter) {
-      state.listFilter = filter;
-    },
     updateLists(state, lists) {
       state.lists = lists;
     },
     async refreshLists(state) {
-      const url = state.listFilter ? `api/lists?owner=${state.listFilter}` : 'api/lists';
+      const url = 'api/lists';
       const res = await fetch(url).then(async r => r.json());
       state.lists = res;
     },
-    updateUsers(state, users) {
-      state.users = users;
+    async refreshMyLists(state) {
+      const url = `api/lists?owner=${state.username}`;
+      const res = await fetch(url).then(async r => r.json());
+      state.myLists = res;
     },
     async refreshUsers(state) {
       const url = 'api/users';
       const res = await fetch(url).then(async r => r.json());
       state.users = res;
-    }
+    },
+    updatePresets(state, presets) {
+      state.presets = presets;
+    },
+    async refreshPresets(state) {
+      const url = `api/presets?owner=${state.username}`;
+      const res = await fetch(url).then(async r => r.json());
+      state.presets = res;
+    },
+    updateSearch(state, search) {
+      state.search = search;
+    },
   },
   // Store data across page refreshes, only discard on browser close
   plugins: [createPersistedState()]

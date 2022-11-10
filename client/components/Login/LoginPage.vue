@@ -3,6 +3,8 @@
 
 <template>
   <main>
+      <SideBar />
+      <div class="content">
     <section>
       <header>
         <h2>New to Fritter?</h2>
@@ -15,18 +17,21 @@
       </header>
       <LoginForm />
     </section>
+    </div>
   </main>
 </template>
 
 <script>
 import RegisterForm from '@/components/Login/RegisterForm.vue';
 import LoginForm from '@/components/Login/LoginForm.vue';
+import SideBar from '@/components/common/SideBar.vue'
 
 export default {
   name: 'LoginPage',
   components: {
     RegisterForm,
-    LoginForm
+    LoginForm,
+    SideBar
   }
 };
 </script>

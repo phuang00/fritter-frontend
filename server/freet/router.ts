@@ -53,6 +53,15 @@ router.get(
   }
 );
 
+router.get(
+  '/notifs',
+  async (req:Request, res: Response) => {
+    const allNotifs = await FreetCollection.findAllNotifs(req.session.userId);
+    const response = allNotifs.map(util.constructFreetResponse);
+    res.status(200).json(response);
+  }
+)
+
 /**
  * Create a new freet.
  *
@@ -128,7 +137,6 @@ router.patch(
   ],
   async (req: Request, res: Response) => {
     const freet = await FreetCollection.updateOne(req.params.freetId, req.body.content, req.body.highlighted);
-    console.log(req.body);
     res.status(200).json({
       message: 'Your freet was updated successfully.',
       freet: util.constructFreetResponse(freet)

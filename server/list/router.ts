@@ -29,7 +29,7 @@ router.get(
   '/',
   async (req: Request, res: Response, next: NextFunction) => {
     // Check if owner query parameter was supplied
-    if (req.query.owner !== undefined) {
+    if (req.query.owner !== undefined || req.query.contains !== undefined) {
       next();
       return;
     }
@@ -38,13 +38,22 @@ router.get(
     const response = allLists.map(util.constructListResponse);
     res.status(200).json(response);
   },
+  [],
+  async (req: Request, res: Response, next: NextFunction) => {
+    if (req.query.owner !== undefined) {
+      next();
+      return;
+    }
+    const lists = await ListCollection.findAllBySearchInput(req.session.userId, req.query.contains as string);
+    const response = lists.map(util.constructListResponse);
+    res.status(200).json(response);
+  },
   [
     userValidator.isOwnerExists
   ],
   async (req: Request, res: Response, next: NextFunction) => {
     if (req.query.listName !== undefined) {
       next();
-      console.log('here');
       return;
     }
     const ownerLists = await ListCollection.findAllByUsername(req.query.owner as string);
@@ -55,11 +64,10 @@ router.get(
     listValidator.isListNameExists
   ],
   async (req: Request, res: Response) => {
-    console.log('herea');
     const user = await UserCollection.findOneByUsername(req.query.owner as string);
     const list = await ListCollection.findOneByListName(user._id, req.query.listName as string);
     res.status(200).json(util.constructListResponse(list));
-  }
+  },
 );
 
 /**
@@ -79,12 +87,11 @@ router.post(
   '/',
   [
     userValidator.isUserLoggedIn,
-    listValidator.isListNameExists,
+    listValidator.isValidListName,
     listValidator.isListContentsNonempty,
     listValidator.isValidListContents,
   ],
   async (req: Request, res: Response) => {
-    console.log(req.body);
     const ownerId = (req.session.userId as string) ?? ''; // Will not be an empty string since its validated in isUserLoggedIn
     const memberIds = await Promise.all(req.body.members.map(async (member: string) => {
       const user = await UserCollection.findOneByUsername(member);
@@ -113,7 +120,7 @@ router.delete(
   '/:listId?',
   [
     userValidator.isUserLoggedIn,
-    listValidator.isValidListName,
+    listValidator.isListExists,
     listValidator.isValidListModifier
   ],
   async (req: Request, res: Response) => {

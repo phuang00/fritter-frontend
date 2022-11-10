@@ -1,5 +1,5 @@
 import {HydratedDocument, Types} from 'mongoose';
-import type {List, Privacy} from './model';
+import {List, Privacy} from './model';
 import ListModel from './model';
 import UserCollection from '../user/collection';
 
@@ -109,6 +109,10 @@ class ListCollection {
    */
   static async deleteMany(ownerId: Types.ObjectId | string): Promise<void> {
     await ListModel.deleteMany({ownerId});
+  }
+
+  static async findAllBySearchInput(userId: Types.ObjectId | string, input: string):Promise<Array<HydratedDocument<List>>> {
+    return ListModel.find({ listName: { $regex: input, $options: "i" }}).find({$or: [{ownerId: userId}, {privacy: 'public'}] }).populate('ownerId').populate('members');
   }
 }
 

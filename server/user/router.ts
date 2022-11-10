@@ -1,4 +1,4 @@
-import type {Request, Response} from 'express';
+import type {NextFunction, Request, Response} from 'express';
 import express from 'express';
 import FreetCollection from '../freet/collection';
 import UserCollection from './collection';
@@ -42,9 +42,19 @@ router.get(
   [
     userValidator.isUserLoggedIn
   ],
-  async (req: Request, res: Response) => {
+  async (req: Request, res: Response, next: NextFunction) => {
+    if (req.query.contains !== undefined) {
+      next();
+      return;
+    }
+
     const allUsers = await UserCollection.findAll();
     const response = allUsers.map(util.constructUserResponse);
+    res.status(200).json(response);
+  },
+  async (req:Request, res:Response) => {
+    const users = await UserCollection.findAllBySearchInput(req.session.userId, req.query.contains as string);
+    const response = users.map(util.constructUserResponse);
     res.status(200).json(response);
   }
 );
